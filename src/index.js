@@ -8,6 +8,8 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import Loginpage from './loginpage';
 import { AuthProvider } from './Auths/authContext';
 import { RequireAuth } from './Auths/requireAuth';
+import Dash from './dash';
+import Home from './home';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
@@ -16,11 +18,12 @@ root.render(
         <BrowserRouter>
           <Routes>
             <Route path="/login" element={<Loginpage />} />
-            <Route path="/*" element={
+            <Route path="/admin" element={
               <RequireAuth>
-                <App />
+                <App/>
               </RequireAuth>
             } />
+            <Route path='/*' element={<Home />} />
           </Routes>
         </BrowserRouter>
       </AuthProvider>
