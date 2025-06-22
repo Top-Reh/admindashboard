@@ -6,6 +6,7 @@ import ImagesPage from './tabs/imagepage';
 import BlogsPage from './tabs/blogspage';
 import EventsPage from './tabs/eventpage';
 import ColorThemePage from './tabs/colorthemepage';
+import Aboutpage from './tabs/aboutpage';
 
 function App() {
     const { logout } = useAuth();
@@ -23,6 +24,7 @@ function App() {
           {tab === "events" && <EventsPage />}
           {tab === "blogs" && <BlogsPage />}
           {tab === "color" && <ColorThemePage />}
+          {tab === "about" && <Aboutpage />}
         </main>
       </div>
     );
@@ -34,6 +36,7 @@ export default App;
   function Sidebar({ currentTab, onTabChange, onLogout }) {
     const tabs = [
       { id: "images", label: "Images" },
+      { id: "about", label: "About us" },
       { id: "events", label: "Events" },
       { id: "blogs", label: "Blogs" },
       { id: "color", label: "Color Theme" },

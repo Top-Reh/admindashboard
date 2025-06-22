@@ -1,4 +1,4 @@
-import { collection, getDocs, orderBy, query } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs, orderBy, query } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import { db } from "./firebase";
 
@@ -9,18 +9,10 @@ export default function Home() {
     useEffect(() => {
         const fetch = async () => {
             //featuerd image
-            const q = query(
-                collection(db, "images"),
-                orderBy("createdAt", "desc")
-            );
+            const q = doc(db, "InUses", "herosection");
 
-            const querySnapshot = await getDocs(q);
-            if (querySnapshot.docs.length > 0) {
-                // Get the last document
-                const lastDoc = querySnapshot.docs[0];
-                console.log(lastDoc.id, " => ", lastDoc.data());
-                setFeaturedImage(lastDoc.data().url);
-            }
+            const docSnap = await getDoc(q);
+            setFeaturedImage(docSnap.data().url);
             // Fetch events
             const eventsQuery = query(
                 collection(db, "events"),
