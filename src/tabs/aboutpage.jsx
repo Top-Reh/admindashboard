@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import { DateTimeInput, FormInput, FormTextarea, GalleryUploader } from './inputs';
-import { collection, doc, getDocs, orderBy, query, serverTimestamp, setDoc, Timestamp } from 'firebase/firestore';
+import { collection, deleteDoc, doc, getDoc, getDocs, orderBy, query, serverTimestamp, setDoc, Timestamp } from 'firebase/firestore';
 import { db, storage } from '../firebase';
 import {v4 as uuid} from "uuid";
-import { getDownloadURL, ref, uploadBytes } from '@firebase/storage';
+import { deleteObject, getDownloadURL, ref, uploadBytes } from '@firebase/storage';
 
 const Aboutpage = () => {
   const initialState = {
@@ -16,24 +16,25 @@ const Aboutpage = () => {
     const [form, setForm] = useState(initialState);
     const [uploadingFeat, setUploadingFeat] = useState(false);
     const [error, setError] = useState("");
-    const [events, setEvents] = useState([]);
+    const [about, setabout] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [selectedblog, setSelectedBlog] = useState('');
 
-    // Fetch events
+    // Fetch about
     useEffect(() => {
-      const fetchEvents = async () => {
+      const fetchabout = async () => {
         try {
           const q = query(collection(db, "aboutus"), orderBy("datetime", "desc"));
           const snapshot = await getDocs(q);
           const evs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-          setEvents(evs);
+          setabout(evs);
         } catch (err) {
           setError(err.message);
         } finally {
           setLoading(false);
         }
       };
-      fetchEvents();
+      fetchabout();
     }, []);
 
     // Upload featured image
@@ -43,11 +44,6 @@ const Aboutpage = () => {
       setError("");
       setUploadingFeat(true);
       try {
-        // const storageRef = storage.ref();
-        // const timestamp = Date.now();
-        // const fileRef = storageRef.child(`events/featured/${timestamp}-${file.name}`);
-        // await fileRef.put(file);
-        // const url = await fileRef.getDownloadURL();
         const timestamp = Date.now();
         const fileRef = ref(storage, `aboutus/${timestamp}-${file.name}`);
         await uploadBytes(fileRef, file);
@@ -64,20 +60,13 @@ const Aboutpage = () => {
     // Handle form submission
     const handleSubmit = async (e) => {
       e.preventDefault();
+      if (!window.confirm("Add this blog?")) return;
       setError("");
       if (!form.title.trim()) {
         setError("Title is required");
         return;
       }
       try {
-        // await collection("events").add({
-        //   featuredImage: form.featuredImage,
-        //   title: form.tit`le,
-        //   content: form.content,
-        //   datetime: form.datetime ? new Date(form.datetime) : null,
-        //   gallery: form.gallery,
-        //   createdAt: serverTimestamp()
-        // });
         const tid = uuid();
         console.log("Submitting event:", form);
         await setDoc(doc(db, "aboutus", tid), {
@@ -90,23 +79,53 @@ const Aboutpage = () => {
 
         setForm(initialState);
 
-        // Refresh events
-        const q = query(collection(db, "aboutus"), orderBy("datetime", "desc"));
+        // Refresh about
+        const q = query(collection(db, "aboutus"), orderBy("datetime", "asc"));
         const snapshot = await getDocs(q);
         const evs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setEvents(evs);
+        setabout(evs);
       } catch (err) {
         setError(err.message);
         console.error("Event submit error:", err);
       }
     };
 
-    const removeGalleryImage = (index) => {
-      setForm(prev => ({
-        ...prev,
-        gallery: prev.gallery.filter((_, i) => i !== index)
-      }));
-    };
+    const handleRemoveblog = async (data) => {
+      if (!window.confirm("Are you sure you want to delete this blog?")) return;
+
+      try {
+      // Delete from Firebase Storage
+      const storageRef = ref(storage, data.featuredImage);
+      await deleteObject(storageRef);
+      
+      // Delete from Firestore
+      await deleteDoc(doc(db, "aboutus", data.id));
+      const q = query(collection(db, "aboutus"), orderBy("datetime", "desc"));
+      const snapshot = await getDocs(q);
+      const evs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setabout(evs);
+
+      } catch (error) {
+        console.error("Error deleting data:", error);
+        alert("Failed to delete data: " + error.message);
+      }
+    }
+
+    const handleApplyabout = async(e) => {
+      if (!window.confirm("Are you sure you want to Apply this blog?")) return;
+      console.log("Applying about us:", e);
+      await setDoc(doc(db, "InUses", "aboutus"), e);
+      setSelectedBlog(e.id);
+    }
+
+    useEffect(() => {
+      const fetchSelectedBlog = async () => {
+        const q = doc(db, "InUses", "aboutus");
+        const docSnap = await getDoc(q);
+        setSelectedBlog(docSnap.data().id);
+      }
+      fetchSelectedBlog();
+    }, []);
 
     return (
       <div>
@@ -151,26 +170,33 @@ const Aboutpage = () => {
 
         <h3 className="text-2xl font-semibold mb-4">Existing About us</h3>
         {loading ? (
-          <p>Loading events...</p>
-        ) : events.length === 0 ? (
+          <p>Loading about...</p>
+        ) : about.length === 0 ? (
           <p>No about us yet.</p>
         ) : (
             
           <div className="space-y-6 flex flex-col gap-6">
-            {events.map((ev) => (
-                <section key={ev.id} className="bg-white py-16 rounded-lg shadow-md">
-                    <div className="max-w-7xl mx-auto px-4 grid md:grid-cols-2 gap-8">
-                    <div className="relative">
+            {about.map((ev) => (
+                <section key={ev.id} className="bg-white py-7 rounded-lg shadow-md relative overflow-hidden">
+                    <div className="max-w-7xl mx-auto px-4 grid md:grid-cols-2 gap-8 ">
+                    <div className=" gap-2 flex flex-col items-center">
                         <img src={ev.featuredImage} alt="Take a tour" className="rounded shadow" />
+                        {selectedblog === ev.id ? (
+                            <span className="bg-green-300 font-semibold absolute top-0 left-0 py-3 px-5 cursor-pointer">Applied</span>
+                        ) : (
+                            <button className='bg-green-300 rounded-md py-3 w-full font-semibold ' onClick={() => handleApplyabout(ev)}>Apply</button>
+                        )}
+                        {
+                          selectedblog !== ev.id && (
+                            <span className="bg-red-300 font-semibold absolute top-0 right-0 py-3 px-5 cursor-pointer" onClick={()=> handleRemoveblog(ev)}>Delete</span>
+                          )
+                        }
                     </div>
                     <div>
                         <h2 className="text-xl font-bold mb-4">{ev.title}</h2>
                         <p className="text-gray-600 mb-6">
                             {ev.content}
                         </p>
-                        <button className="text-sm bg-teal-600 text-white px-4 py-2 rounded hover:bg-teal-700">
-                        READ MORE
-                        </button>
                     </div>
                     </div>
                 </section>

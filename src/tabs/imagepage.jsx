@@ -89,6 +89,7 @@ function ImageList({ images,onImageDeleted,setcurrentFeaturedImaged}) {
     }
 
     const handleSubmit = async () => {
+        if (!window.confirm("Use this image as a featured image?")) return;
         const selectedImg = images.find(img => img.id === selectedImageid);
         if (selectedImg) {
         setcurrentFeaturedImaged(selectedImg); // Update parent state immediately

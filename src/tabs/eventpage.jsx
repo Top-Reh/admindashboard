@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import { DateTimeInput, FormInput, FormTextarea, GalleryUploader } from './inputs';
-import { collection, doc, getDocs, orderBy, query, serverTimestamp, setDoc, Timestamp } from 'firebase/firestore';
+import { collection, deleteDoc, doc, getDocs, orderBy, query, serverTimestamp, setDoc, Timestamp } from 'firebase/firestore';
 import { db, storage } from '../firebase';
 import {v4 as uuid} from "uuid";
-import { getDownloadURL, ref, uploadBytes } from '@firebase/storage';
+import { deleteObject, getDownloadURL, ref, uploadBytes } from '@firebase/storage';
 
 function EventsPage() {
     const initialState = {
@@ -103,11 +103,23 @@ function EventsPage() {
       }
     };
 
-    const removeGalleryImage = (index) => {
-      setForm(prev => ({
-        ...prev,
-        gallery: prev.gallery.filter((_, i) => i !== index)
-      }));
+    const handleRemoveEvent = async(data) => {
+      if (!window.confirm("Are you sure you want to delete this image?")) return;
+      try {
+      // Delete from Firebase Storage
+      const storageRef = ref(storage, data.featuredImage);
+      await deleteObject(storageRef);
+      
+      // Delete from Firestore
+      await deleteDoc(doc(db, "events", data.id));
+      const q = query(collection(db, "events"), orderBy("datetime", "desc"));
+      const snapshot = await getDocs(q);
+      const evs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setEvents(evs);
+      } catch (error) {
+      console.error("Error deleting event:", error);
+      alert("Failed to delete event: " + error.message);
+      }
     };
 
     return (
@@ -161,7 +173,13 @@ function EventsPage() {
         ) : (
           <div className="space-y-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {events.map((ev) => (
-              <article key={ev.id} className="p-4 rounded-md shadow-md bg-white border border-gray-100">
+              <article key={ev.id} className="p-4 rounded-md shadow-md bg-white border border-gray-100 relative">
+                <button 
+                    type="button" 
+                    onClick={() => handleRemoveEvent(ev)}
+                    className="absolute top-0 right-0 bg-black bg-opacity-60 text-white rounded-bl-md px-1 hover:bg-opacity-80 transition"
+                    aria-label="Remove image"
+                    >&times;</button>
                 {ev.featuredImage && (
                   <img src={ev.featuredImage} alt="Featured" className="w-full max-h-60 object-cover rounded-md mb-4" />
                 )}

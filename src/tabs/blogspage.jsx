@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import { DateTimeInput, FormInput, FormTextarea, GalleryUploader } from './inputs';
-import { collection, doc, getDocs, orderBy, query, serverTimestamp, setDoc, Timestamp } from 'firebase/firestore';
+import { collection, deleteDoc, doc, getDocs, orderBy, query, serverTimestamp, setDoc, Timestamp } from 'firebase/firestore';
 import { db, storage } from '../firebase';
 import {v4 as uuid} from "uuid";
-import { getDownloadURL, ref, uploadBytes } from '@firebase/storage';
+import { deleteObject, getDownloadURL, ref, uploadBytes } from '@firebase/storage';
 
   // Blog Form Page (almost same as events)
   function BlogsPage() {
@@ -104,11 +104,23 @@ import { getDownloadURL, ref, uploadBytes } from '@firebase/storage';
       }
     };
 
-    const removeGalleryImage = (index) => {
-      setForm(prev => ({
-        ...prev,
-        gallery: prev.gallery.filter((_, i) => i !== index)
-      }));
+    const handleremoveblog = async(data) => {
+      if (!window.confirm("Are you sure you want to delete this image?")) return;
+      try {
+      // Delete from Firebase Storage
+      const storageRef = ref(storage, data.featuredImage);
+      await deleteObject(storageRef);
+      
+      // Delete from Firestore
+      await deleteDoc(doc(db, "blogs", data.id));
+      const q = query(collection(db, "blogs"), orderBy("datetime", "desc"));
+      const snapshot = await getDocs(q);
+      const bls = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setBlogs(bls);
+      } catch (error) {
+      console.error("Error deleting event:", error);
+      alert("Failed to delete event: " + error.message);
+      }
     };
 
     return (
@@ -162,7 +174,13 @@ import { getDownloadURL, ref, uploadBytes } from '@firebase/storage';
         ) : (
           <div className="space-y-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {blogs.map((bl) => (
-              <article key={bl.id} className="p-4 rounded-md shadow-md bg-white border border-gray-100">
+              <article key={bl.id} className="p-4 rounded-md shadow-md bg-white border border-gray-100 relative">
+                <button 
+                    type="button" 
+                    onClick={() => handleremoveblog(bl)}
+                    className="absolute top-0 right-0 bg-black bg-opacity-60 text-white rounded-bl-md px-1 hover:bg-opacity-80 transition"
+                    aria-label="Remove image"
+                    >&times;</button>
                 {bl.featuredImage && (
                   <img src={bl.featuredImage} alt="Featured" className="w-full max-h-60 object-cover rounded-md mb-4" />
                 )}

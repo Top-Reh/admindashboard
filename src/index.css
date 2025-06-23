@@ -22,3 +22,33 @@ code {
 ::-webkit-scrollbar-track {
   background: transparent;
 }
+
+.aboutusimg {
+  height: 600px;
+  width: 500px;
+  object-fit: cover;
+  margin-top: -70px;
+  margin-bottom: -70px;
+}
+
+.blogsdivs:nth-child(1) {
+  width: 100%;
+  height: 200px;
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  background-color: white;
+  border-radius: 7px;
+  box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 20px;
+}
+
+.blogsdivs {
+  width: 49%;
+  height: 340px;
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  background-color: white;
+  border-radius: 7px;
+  box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 20px;
+}
