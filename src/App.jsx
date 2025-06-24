@@ -1,12 +1,14 @@
 import './App.css';
 import './index.css';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAuth } from './Auths/authContext';
 import ImagesPage from './tabs/imagepage';
 import BlogsPage from './tabs/blogspage';
 import EventsPage from './tabs/eventpage';
 import ColorThemePage from './tabs/colorthemepage';
 import Aboutpage from './tabs/aboutpage';
+import { doc, getDoc, onSnapshot } from 'firebase/firestore';
+import { db } from './firebase';
 
 function App() {
     const { logout } = useAuth();
@@ -34,6 +36,26 @@ export default App;
 
   // Navigation sidebar component
   function Sidebar({ currentTab, onTabChange, onLogout }) {
+
+    const [color, setColor] = useState("#000000");
+
+    useEffect(() => {
+      const unsubscribe = onSnapshot(doc(db, "InUses", "color"), (docSnapshot) => {
+        try {
+          if (docSnapshot.exists()) {
+            setColor(docSnapshot.data().color || "#000000"); // Update state on change
+          } else {
+            console.log("No such document!");
+            setColor("#000000"); // Fallback
+          }
+        } catch (err) {
+          console.error("Error listening to color changes:", err);
+        }
+      });
+
+      return () => unsubscribe();
+    },[]);
+
     const tabs = [
       { id: "images", label: "Images" },
       { id: "about", label: "About us" },
@@ -53,9 +75,10 @@ export default App;
                   onClick={() => onTabChange(tab.id)}
                   className={`w-full text-left font-medium p-2 rounded-lg transition duration-150 ${
                     currentTab === tab.id
-                      ? "bg-black text-white shadow-md"
+                      ? " text-white shadow-md"
                       : "text-gray-700 hover:bg-gray-100"
                   }`}
+                  style={{ backgroundColor: currentTab === tab.id ? color : 'transparent' }}
                 >
                   {tab.label}
                 </button>

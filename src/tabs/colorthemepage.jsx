@@ -1,5 +1,6 @@
-import { collection, serverTimestamp } from "firebase/firestore";
+import { collection, doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
+import { db } from "../firebase";
 
   // Website Color Theme Management Page
   function ColorThemePage() {
@@ -10,15 +11,18 @@ import { useEffect, useState } from "react";
     useEffect(() => {
       const fetchTheme = async () => {
         try {
-          const doc = await collection("settings").doc("theme").get();
-          if (doc.exists) {
-            const data = doc.data();
-            if (data && data.primaryColor) {
-              setColor(data.primaryColor);
-              document.documentElement.style.setProperty('--color-primary', data.primaryColor);
-              document.documentElement.style.setProperty('--color-primary-rgb', hexToRgb(data.primaryColor));
-            }
-          }
+          //const doc = await collection("settings").doc("theme").get();
+          const colordata = doc(db, "InUses", "color");
+          const colordatadoc = await getDoc(colordata);
+          setColor(colordatadoc.data().color || "#000000");
+          // if (doc.exists) {
+          //   const data = doc.data();
+          //   if (data && data.primaryColor) {
+          //     setColor(data.primaryColor);
+          //     document.documentElement.style.setProperty('--color-primary', data.primaryColor);
+          //     document.documentElement.style.setProperty('--color-primary-rgb', hexToRgb(data.primaryColor));
+          //   }
+          // }
         } catch (err) {
           setError(err.message);
         } finally {
@@ -28,26 +32,30 @@ import { useEffect, useState } from "react";
       fetchTheme();
     }, []);
 
-    const hexToRgb = (hex) => {
-      // convert hex to rgb string for CSS (without alpha)
-      const shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
-      hex = hex.replace(shorthandRegex, function(m, r, g, b) {
-        return r + r + g + g + b + b;
-      });
-      const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-      return result ? `${parseInt(result[1],16)}, ${parseInt(result[2],16)}, ${parseInt(result[3],16)}` : '0,0,0';
-    };
+    // const hexToRgb = (hex) => {
+    //   // convert hex to rgb string for CSS (without alpha)
+    //   const shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+    //   hex = hex.replace(shorthandRegex, function(m, r, g, b) {
+    //     return r + r + g + g + b + b;
+    //   });
+    //   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    //   return result ? `${parseInt(result[1],16)}, ${parseInt(result[2],16)}, ${parseInt(result[3],16)}` : '0,0,0';
+    // };
 
     const handleSubmit = async (e) => {
       e.preventDefault();
       setError("");
       try {
-        await collection("settings").doc("theme").set({
-          primaryColor: color,
+        await setDoc(doc(db, "InUses", "color"), {
+          color: color,
           updatedAt:serverTimestamp()
         });
-        document.documentElement.style.setProperty('--color-primary', color);
-        document.documentElement.style.setProperty('--color-primary-rgb', hexToRgb(color));
+        // await collection("settings").doc("theme").set({
+        //   primaryColor: color,
+        //   updatedAt:serverTimestamp()
+        // });
+        // document.documentElement.style.setProperty('--color-primary', color);
+        // document.documentElement.style.setProperty('--color-primary-rgb', hexToRgb(color));
         alert("Theme color updated!");
       } catch (err) {
         setError(err.message);

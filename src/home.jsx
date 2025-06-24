@@ -125,34 +125,19 @@ Create a safe, inclusive environment where every learner thrives.</p>
               {
                 blogs.map((item, idx) => (
                   <div key={idx} className="blogsdivs" style={{backgroundImage: `url(${item.featuredImage})`, backgroundSize: 'cover', backgroundPosition: 'center'}}>
-                    <div className="p-5 bg-black bg-opacity-20 w-full h-full">
+                    <div className="p-5 bg-black bg-opacity-20 w-full h-full flex flex-col justify-end items-start">
                       <h2 className="text-2xl font-bold text-white mb-2">{item.title}</h2>
-                      <p className="text-sm text-white line-clamp-5 whitespace-normal w-full">{item.content}</p>
                       <button className="text-white">Learn more</button>
                     </div>
                   </div>
                 ))
               }
-              <div className="blogsdivs" style={{backgroundImage: `url(https://img.freepik.com/free-photo/free-time-students-bachelor-s-campus-life-rhythm-five-friendly-students-are-walking_8353-6408.jpg?t=st=1750667344~exp=1750670944~hmac=a11354efb6ef9b85f3ffb23fa19e01e6757245db638e2580ba1f3ff183ae8d73&w=1380)`, backgroundSize: 'cover', backgroundPosition: 'center'}}>
-                <div className="p-5 bg-black bg-opacity-20 w-full h-full">
-                  <h2 className="text-2xl font-bold text-white mb-2">Upcoming Events</h2>
-                  <p className="text-sm text-white line-clamp-5 whitespace-normal w-full">Lorem ipsum dolor sit amet, consectetur adipiscing elit sit</p>
-                  <button className="text-white">Learn more</button>
-                </div>
-              </div>
-              <div className="blogsdivs" style={{backgroundImage: `url(https://img.freepik.com/free-photo/free-time-students-bachelor-s-campus-life-rhythm-five-friendly-students-are-walking_8353-6408.jpg?t=st=1750667344~exp=1750670944~hmac=a11354efb6ef9b85f3ffb23fa19e01e6757245db638e2580ba1f3ff183ae8d73&w=1380)`, backgroundSize: 'cover', backgroundPosition: 'center'}}>
-                <div className="p-5 bg-black bg-opacity-20 w-full h-full">
-                  <h2 className="text-2xl font-bold text-white mb-2">Upcoming Events</h2>
-                  <p className="text-sm text-white line-clamp-5 whitespace-normal w-full">Lorem ipsum dolor sit amet, consectetur adipiscing elit sit</p>
-                  <button className="text-white">Learn more</button>
-                </div>
-              </div>
             </div>
             <div className="flex gap-2 flex-wrap">
               {
                 events.map((item, idx) => (
                   <div key={idx} className="blogsdivs" style={{backgroundImage: `url(${item.featuredImage})`, backgroundSize: 'cover', backgroundPosition: 'center'}}>
-                    <div className="p-5 bg-black bg-opacity-20 w-full h-full">
+                    <div className="p-5 bg-black bg-opacity-20 w-full h-full flex flex-col justify-end items-start">
                       <h2 className="text-2xl font-bold text-white mb-2">{item.title}</h2>
                       <p className="text-sm text-white line-clamp-5 whitespace-normal w-full">{item.content}</p>
                       <button className="text-white">Learn more</button>
@@ -160,13 +145,6 @@ Create a safe, inclusive environment where every learner thrives.</p>
                   </div>
                 ))
               }
-              <div className="blogsdivs" style={{backgroundImage: `url(https://img.freepik.com/free-photo/free-time-students-bachelor-s-campus-life-rhythm-five-friendly-students-are-walking_8353-6408.jpg?t=st=1750667344~exp=1750670944~hmac=a11354efb6ef9b85f3ffb23fa19e01e6757245db638e2580ba1f3ff183ae8d73&w=1380)`, backgroundSize: 'cover', backgroundPosition: 'center'}}>
-                <div className="p-5 bg-black bg-opacity-20 w-full h-full">
-                  <h2 className="text-2xl font-bold text-white mb-2">Upcoming Events</h2>
-                  <p className="text-sm text-white line-clamp-5 whitespace-normal w-full">Lorem ipsum dolor sit amet, consectetur adipiscing elit ssssssssssssssssssssssssssssssssssssssssssssssssssssssss ssssssssssssssssssssssssssssssssssssss ttttt tttttttt tttttt ttt</p>
-                  <button className="text-white">Learn more</button>
-                </div>
-              </div>
             </div>
           </div>
         </div>
